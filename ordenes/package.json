@@ -1,0 +1,14 @@
+{
+  "name": "ordenes",
+  "version": "1.0.0",
+  "description": "Microservicio de órdenes",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "axios": "^1.6.0",
+    "pg": "^8.11.0"
+  }
+}

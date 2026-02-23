@@ -1,0 +1,14 @@
+{
+  "name": "pagos",
+  "version": "1.0.0",
+  "description": "Microservicio de pagos",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "amqplib": "^0.10.3",
+    "pg": "^8.7.1"
+  }
+}

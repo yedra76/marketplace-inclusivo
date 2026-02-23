@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  catalogo:
+    build: ./catalogo
+    labels:
+      - "traefik.http.routers.catalogo.rule=PathPrefix(`/api/catalogo`)"
+      - "traefik.http.services.catalogo.loadbalancer.server.port=3000"
+      - "traefik.http.routers.catalogo.middlewares=jwt-auth"
+
+  usuarios:
+    build: ./usuarios
+    labels:
+      - "traefik.http.routers.usuarios.rule=PathPrefix(`/api/usuarios`)"
+      - "traefik.http.services.usuarios.loadbalancer.server.port=3001"
+
+  ordenes:
+    build: ./ordenes
+    labels:
+      - "traefik.http.routers.ordenes.rule=PathPrefix(`/api/ordenes`)"
+      - "traefik.http.services.ordenes.loadbalancer.server.port=3002"
+      - "traefik.http.routers.ordenes.middlewares=jwt-auth"
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+  pagos:
+    build: ./pagos
+    labels:
+      - "traefik.http.routers.pagos.rule=PathPrefix(`/api/pagos`)"
+      - "traefik.http.services.pagos.loadbalancer.server.port=3003"
+      - "traefik.http.routers.pagos.middlewares=jwt-auth"
+    depends_on:
+      - rabbitmq
+      - db
+
+
+  db:
+    image: postgres:13
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+
+  traefik:
+    image: traefik:v2.5
+    command:
+      - "--providers.docker=true"
+      - "--api.insecure=true"
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.http.middlewares.jwt-auth.forwardauth.address=http://usuarios:3001/validate-token"
+      - "traefik.http.middlewares.jwt-auth.forwardauth.authRequestHeaders=Authorization"
+
+volumes:
+  postgres_data:
